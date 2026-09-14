@@ -50,6 +50,8 @@ Catalog of every page in the LegalRuleML wiki. Start here.
   keyed JSON extraction of material statements, exact quotes, three independent
   voice relations with evidence spans, procedural voices,
   and adoption status; separate from the `formal-rules` pipeline.
+- [mapping/source-manifest.md](mapping/source-manifest.md) — immutable normalized
+  decision text, digests, canonical quote spans, and PROV equality.
 - [mapping/vedtak-anatomy.md](mapping/vedtak-anatomy.md) — the structure of a
   Skatteklagenemnda vedtak and what each section contributes.
 - [mapping/vedtak-to-legalruleml.md](mapping/vedtak-to-legalruleml.md) — the core

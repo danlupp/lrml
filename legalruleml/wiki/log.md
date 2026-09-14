@@ -232,3 +232,10 @@ log is greppable: `grep "^## \[" log.md | tail -10`.
   examples; and a projection rule that reserves `Role.forExpression` for
   substantive responsibility while retaining narration and endorsement in the
   voice ledger.
+## [2026-09-14] feature | Immutable source manifests and validated quote spans
+
+- Defined per-decision source manifests containing normalized input text, its
+  SHA-256 digest, the source filename, and a versioned normalization policy.
+- Replaced composite voice-ledger quotes with non-overlapping contiguous spans
+  using canonical document-relative character offsets, and added source/PROV
+  byte-equality validation.

@@ -120,9 +120,15 @@ A vedtak maps to constructs roughly as follows:
 | the operative result per year | explicit statement (a granted `Right`, or a `Neg` fact for a denial) |
 | the exact sentence justifying a fragment | a PROV quote in the **`.prov.xml` sidecar**, linked to the fragment’s `@key` |
 
-The semantic output of one run is three files: `<name>.lrml` (the model),
-`<name>.prov.xml` (verbatim source quotes), and `<name>.relations.json`
-(document-local canonical relation signatures and evidence; see [A.4](#a4-the-sidecar-output)).
+The formal semantic output is accompanied by an immutable source layer:
+`<name>.source.json` captures the named source decision's normalized input and
+SHA-256 digest, while `<name>.voices.json` records contiguous quote spans using
+canonical document-relative character offsets. The formal artifacts are
+`<name>.lrml` (the model), `<name>.prov.xml` (verbatim source quotes), and
+`<name>.relations.json` (document-local canonical relation signatures and
+evidence; see [A.4](#a4-the-sidecar-output)). The source/quote format and its
+focused validator are documented in
+[source manifests and quote locators](wiki/mapping/source-manifest.md).
 
 ### A.2 The precise modelling rules
 

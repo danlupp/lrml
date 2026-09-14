@@ -27,6 +27,8 @@ Checks:
   9. Optional document-local relation manifest (<name>.relations.json): exact
       relation coverage, stable signatures, keyed usages, procedural voices,
       source-form evidence, and LRML hash freshness.
+ 10. Sibling source manifest and voice ledger: source digest, canonical
+     character spans, non-overlap, verbatim quotes, and PROV value equality.
 
 Options:
     --strict    treat the hjemmel and voice-profile warnings (7-8) as errors.
@@ -47,6 +49,8 @@ import sys
 import xml.etree.ElementTree as ET
 from collections.abc import Iterator
 from pathlib import Path
+
+from validate_source_bundle import validate_source_bundle
 
 LRML = "http://docs.oasis-open.org/legalruleml/ns/v1.0/"
 RULEML = "http://ruleml.org/spec"
@@ -1043,6 +1047,21 @@ def main() -> int:
             check_sidecar(sidecar, keys)
         else:
             warn(f"no PROV sidecar ({sidecar.name}) — text isomorphism not anchored")
+
+        source_manifest = path.with_suffix(".source.json")
+        voice_ledger = path.with_suffix(".voices.json")
+        if sidecar.is_file() or source_manifest.is_file() or voice_ledger.is_file():
+            if not source_manifest.is_file():
+                err(f"no source manifest ({source_manifest.name}) for voice ledger")
+            elif not voice_ledger.is_file():
+                err(f"no voice ledger ({voice_ledger.name}) for source manifest")
+            else:
+                validate_source_bundle(
+                    source_manifest,
+                    voice_ledger,
+                    sidecar if sidecar.is_file() else None,
+                    lambda message: err(f"source bundle: {message}"),
+                )
 
         if show_hjemmel:
             hjemmel_report(path, root, keys, associations)
