@@ -81,8 +81,20 @@ Before writing XML, make a row for every material contribution:
 
 Recommended role IRI fragments are `claimant`, `first-instance-decider`,
 `recommender`, `decider`, and `dissenter`. These names are this repository's
-application profile, not a controlled OASIS vocabulary. A document may stop at
-a recommendation or record only dissent; do not invent a `decider` Role.
+application profile, not a controlled OASIS vocabulary. Their stable identifiers,
+Norwegian labels and recognition cues, search and operative semantics, direct
+attribution requirement, and search-time parent grouping live in the versioned
+[`v1.0` voice profile](../../application-profiles/voices/v1.0.json), rather than
+in validator code. A document may stop at a recommendation or record only
+dissent; do not invent a `decider` Role.
+
+Actors are always document-local: give each person or institution a local
+`Agent`/`Figure` key and connect it with `filledBy`. A project needing another
+procedural role should copy or extend the versioned profile, supply all role
+metadata, and validate with `--voice-profile FILE`. Merely using an unfamiliar
+IRI does not opt out of checks: every Role still receives structural validation,
+and `unknownRoleSeverity` in the selected profile makes an unknown identifier a
+warning or an error.
 
 The model-author Role is provenance about the generated XML, not a procedural
 voice. Use `author` or `model-author`, and do not count it as support for the
@@ -163,7 +175,9 @@ python3 legalruleml/bin/validate_lrml.py --strict --relations --voices path/to/d
 ```
 
 `--voices` prints attribution and Context selection separately. Recognized
-substantive Roles enable profile checks even without the flag.
+substantive Roles enable profile checks even without the flag; any unknown Role
+also enables them so that it cannot silently become non-substantive. Select a
+compatible versioned or extended profile with `--voice-profile FILE`.
 
 ## See also
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Validate a LegalRuleML file (and its optional PROV sidecar).
 
-Usage: python3 legalruleml/bin/validate_lrml.py [--strict] [--hjemmel] [--voices] [--relations] <name>.lrml
+Usage: python3 legalruleml/bin/validate_lrml.py [--strict] [--hjemmel] [--voices] [--relations] [--voice-profile FILE] <name>.lrml
 
 Checks:
   1. XSD validity against the vendored OASIS compact schema
@@ -38,6 +38,9 @@ Options:
                             a recognized substantive procedural Role occurs in the file.
     --relations require and validate the relation manifest, then print its
                 canonical relation/signature/usage table.
+    --voice-profile FILE
+                use a versioned voice application profile other than the
+                repository default (for example, one defining extra roles).
 
 Exit code 0 = all checks pass, 1 = at least one error.
 """
@@ -62,6 +65,12 @@ SCHEMA = (
     / "xsd-schema"
     / "compact"
     / "lrml-compact.xsd"
+)
+DEFAULT_VOICE_PROFILE = (
+    Path(__file__).resolve().parent.parent
+    / "application-profiles"
+    / "voices"
+    / "v1.0.json"
 )
 
 errors: list[str] = []
@@ -194,18 +203,64 @@ STATEMENT_TAGS = RULE_STATEMENT_TAGS + (
     f"{{{LRML}}}ReparationStatement",
 )
 ACTOR_TAGS = (f"{{{LRML}}}Agent", f"{{{LRML}}}Figure")
-SUBSTANTIVE_ROLE_NAMES = {
-    "claimant",
-    "first-instance-decider",
-    "recommender",
-    "decider",
-    "dissenter",
-}
-AUTHOR_ROLE_NAMES = {"author", "model-author"}
 ROLE_EXPRESSION_TAGS = STATEMENT_TAGS + (
     f"{{{RULEML}}}Rule",
     f"{{{RULEML}}}Atom",
 )
+
+
+def load_voice_profile(path: Path) -> dict[str, object]:
+    """Load and structurally validate a versioned voice application profile."""
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        err(f"voice profile {path}: cannot read JSON: {exc}")
+        return {"roles": {}, "unknownRoleSeverity": "error"}
+    if not isinstance(payload, dict):
+        err(f"voice profile {path}: root must be an object")
+        return {"roles": {}, "unknownRoleSeverity": "error"}
+    if payload.get("schemaVersion") != "1.0":
+        err(f"voice profile {path}: schemaVersion must be '1.0'")
+    severity = payload.get("unknownRoleSeverity")
+    if severity not in {"warning", "error"}:
+        err(f"voice profile {path}: unknownRoleSeverity must be 'warning' or 'error'")
+    roles = payload.get("roles")
+    if not isinstance(roles, list):
+        err(f"voice profile {path}: roles must be an array")
+        return {**payload, "roles": {}}
+    indexed: dict[str, dict[str, object]] = {}
+    required = {
+        "stableRoleIdentifier": str,
+        "norwegianLabels": list,
+        "textualCues": list,
+        "searchableVoice": bool,
+        "mayMakeOperativeFindings": bool,
+        "directExpressionAttributionRequired": bool,
+    }
+    for index, role in enumerate(roles):
+        if not isinstance(role, dict):
+            err(f"voice profile {path}: roles[{index}] must be an object")
+            continue
+        identifier = role.get("stableRoleIdentifier")
+        for field, kind in required.items():
+            if not isinstance(role.get(field), kind):
+                err(f"voice profile {path}: roles[{index}].{field} has invalid type")
+        if not isinstance(identifier, str) or not identifier:
+            continue
+        if identifier in indexed:
+            err(f"voice profile {path}: duplicate role '{identifier}'")
+            continue
+        parent = role.get("parentRole")
+        if parent is not None and not isinstance(parent, str):
+            err(f"voice profile {path}: role '{identifier}' has invalid parentRole")
+        indexed[identifier] = role
+    for identifier, role in indexed.items():
+        parent = role.get("parentRole")
+        if parent is not None and parent not in indexed:
+            err(
+                f"voice profile {path}: role '{identifier}' has unknown parentRole '{parent}'"
+            )
+    return {**payload, "roles": indexed}
 
 
 def iri_name(value: str) -> str:
@@ -224,31 +279,43 @@ def _child_refs(element: ET.Element, local_name: str) -> tuple[str, ...]:
 class VoiceRole:
     """One Role and its direct Actor/expression edges (Core §4.3.2)."""
 
-    def __init__(self, element: ET.Element) -> None:
+    def __init__(
+        self, element: ET.Element, definitions: dict[str, dict[str, object]]
+    ) -> None:
         self.element = element
         self.key = strip_key(element.get("key") or "(unkeyed)")
         self.iri = element.get("iri") or ""
         key_name = self.key.removeprefix("role-")
-        known_names = SUBSTANTIVE_ROLE_NAMES | AUTHOR_ROLE_NAMES
-        self.name = (
-            iri_name(self.iri)
-            if self.iri
-            else (key_name if key_name in known_names else "")
-        )
+        self.name = iri_name(self.iri) if self.iri else key_name
+        self.metadata = definitions.get(self.name)
         self.actors = list(_child_refs(element, "filledBy"))
         self.expressions = list(_child_refs(element, "forExpression"))
 
     @property
     def substantive(self) -> bool:
-        return self.name in SUBSTANTIVE_ROLE_NAMES
+        return bool(self.metadata and self.metadata.get("searchableVoice"))
 
     @property
     def author(self) -> bool:
-        return self.name in AUTHOR_ROLE_NAMES or self.key == "role-author"
+        return bool(self.metadata and not self.metadata.get("searchableVoice"))
+
+    @property
+    def direct_expression_required(self) -> bool:
+        return bool(
+            self.metadata and self.metadata.get("directExpressionAttributionRequired")
+        )
+
+    @property
+    def operative(self) -> bool:
+        return bool(self.metadata and self.metadata.get("mayMakeOperativeFindings"))
 
 
-def collect_voice_roles(root: ET.Element) -> list[VoiceRole]:
-    return [VoiceRole(element) for element in root.iter(f"{{{LRML}}}Role")]
+def collect_voice_roles(
+    root: ET.Element, profile: dict[str, object]
+) -> list[VoiceRole]:
+    definitions = profile.get("roles", {})
+    assert isinstance(definitions, dict)
+    return [VoiceRole(element, definitions) for element in root.iter(f"{{{LRML}}}Role")]
 
 
 def _statement_ancestor_key(
@@ -267,6 +334,7 @@ def check_voices(
     root: ET.Element,
     keys: dict[str, ET.Element],
     roles: list[VoiceRole],
+    profile: dict[str, object],
     strict: bool,
 ) -> None:
     """Validate this repository's spec-informed voice attribution profile."""
@@ -275,6 +343,14 @@ def check_voices(
     substantive_roles = [role for role in roles if role.substantive]
 
     for role in roles:
+        if role.metadata is None:
+            unknown_report = (
+                err if profile.get("unknownRoleSeverity") == "error" else warn
+            )
+            unknown_report(
+                f"Role '{role.key}' has unknown role identifier "
+                f"'{role.name or '(none)'}' in voice profile"
+            )
         if role.substantive and not role.iri:
             report(f"Role '{role.key}' has no @iri identifying its function")
         for actor_key in role.actors:
@@ -286,8 +362,8 @@ def check_voices(
                 )
         if role.substantive and not role.actors:
             report(f"substantive Role '{role.key}' has no filledBy Actor")
-        if role.substantive and not role.expressions:
-            report(f"substantive Role '{role.key}' has no forExpression target")
+        if role.direct_expression_required and not role.expressions:
+            report(f"Role '{role.key}' requires a direct forExpression target")
         for expression_key in role.expressions:
             expression = keys.get(expression_key)
             if expression is not None and expression.tag == f"{{{LRML}}}Context":
@@ -392,8 +468,8 @@ def voices_report(
             print(f"      → {expression_key} ({kind})")
     if not substantive:
         print("  (no substantive procedural Roles)")
-    elif any(role.name == "decider" for role in roles):
-        print("STATUS  operative: decider Role present")
+    elif any(role.operative for role in roles):
+        print("STATUS  operative: a Role permitted to make findings is present")
     elif any(role.name == "recommender" for role in roles):
         print("STATUS  recommendation-only: no decider Role")
     else:
@@ -670,10 +746,12 @@ def check_sidecar(sidecar: Path, keys: dict[str, ET.Element]) -> None:
 
 
 def _relation_occurrences(
-    root: ET.Element, keys: dict[str, ET.Element]
+    root: ET.Element,
+    keys: dict[str, ET.Element],
+    profile: dict[str, object],
 ) -> dict[str, dict[str, object]]:
     parents = {child: parent for parent in root.iter() for child in parent}
-    roles = collect_voice_roles(root)
+    roles = collect_voice_roles(root, profile)
     statement_owners: dict[str, set[str]] = {}
     for role in roles:
         if not role.substantive:
@@ -765,7 +843,10 @@ def _sidecar_relation_evidence(
 
 
 def check_relations(
-    path: Path, root: ET.Element, keys: dict[str, ET.Element]
+    path: Path,
+    root: ET.Element,
+    keys: dict[str, ET.Element],
+    profile: dict[str, object],
 ) -> list[dict[str, object]]:
     manifest_path = path.with_suffix(".relations.json")
     if not manifest_path.is_file():
@@ -805,7 +886,7 @@ def check_relations(
             continue
         declared[iri] = item
 
-    actual = _relation_occurrences(root, keys)
+    actual = _relation_occurrences(root, keys, profile)
     for iri in sorted(actual.keys() - declared.keys()):
         err(f"relation manifest: LRML relation '{iri}' is not declared")
     for iri in sorted(declared.keys() - actual.keys()):
@@ -1011,6 +1092,14 @@ def main() -> int:
     show_hjemmel = "--hjemmel" in args
     show_voices = "--voices" in args
     show_relations = "--relations" in args
+    profile_path = DEFAULT_VOICE_PROFILE
+    if "--voice-profile" in args:
+        index = args.index("--voice-profile")
+        if index + 1 >= len(args):
+            print(__doc__.strip().splitlines()[2])
+            return 2
+        profile_path = Path(args[index + 1])
+        del args[index : index + 2]
     positional = [arg for arg in args if not arg.startswith("--")]
     known_options = ("--strict", "--hjemmel", "--voices", "--relations")
     unknown = [arg for arg in args if arg.startswith("--") and arg not in known_options]
@@ -1030,6 +1119,7 @@ def main() -> int:
         root = None
 
     if root is not None:
+        voice_profile_definition = load_voice_profile(profile_path)
         check_no_embedded_prov(root)
         keys = collect_keys(root)
         check_refs(root, keys)
@@ -1037,10 +1127,10 @@ def main() -> int:
         check_rules(root)
         associations = collect_hjemmel(root, keys)
         check_hjemmel(root, keys, associations, strict)
-        roles = collect_voice_roles(root)
-        voice_profile = show_voices or any(role.substantive for role in roles)
-        if voice_profile:
-            check_voices(root, keys, roles, strict)
+        roles = collect_voice_roles(root, voice_profile_definition)
+        voice_profile_enabled = show_voices or bool(roles)
+        if voice_profile_enabled:
+            check_voices(root, keys, roles, voice_profile_definition, strict)
 
         sidecar = path.with_suffix(".prov.xml")
         if sidecar.is_file():
@@ -1068,7 +1158,7 @@ def main() -> int:
         if show_voices:
             voices_report(root, keys, roles)
         if show_relations:
-            relations = check_relations(path, root, keys)
+            relations = check_relations(path, root, keys, voice_profile_definition)
             relations_report(path, relations)
 
     for w in warnings:
