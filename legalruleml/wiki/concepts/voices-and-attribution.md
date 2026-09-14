@@ -5,7 +5,25 @@ the taxpayer, the first-instance tax office, the secretariat, the deciding board
 and sometimes a dissenting member. LegalRuleML represents responsibility for an
 expression through a Role. *(Core §4.3.2, §5.9)*
 
-## Core pattern
+## Three independent relations
+
+Do not collapse the different things loosely called “attribution”. The
+repository voice ledger records three independent, document-level relations:
+
+- **`asserted_by`** — the voice to which the proposition is substantively
+  attributed, whether stated in its own words or relayed by another narrator;
+- **`reported_by`** — the document voice narrating, quoting, or paraphrasing
+  that proposition; and
+- **`endorsed_by`** — a later voice that expressly adopts the proposition.
+
+One proposition can therefore be asserted by the tax office, reported by the
+secretariat, and endorsed by the board. None of those edges entails either of
+the others. In particular, quotation or paraphrase does not make the narrator
+responsible for the proposition, and document inclusion does not establish
+endorsement. See the concrete JSON shape and evidence rules in the
+[voice-first profile](../mapping/voice-first-profile.md).
+
+## LegalRuleML core pattern
 
 The OASIS relation is direct:
 
@@ -31,9 +49,19 @@ Agent <- filledBy - Role - forExpression -> keyed expression
 ```
 
 `forExpression` targets the keyed statement, rule, or atom for which the Actor
-is responsible. It does not target a Context. Repeat `forExpression` when one
-voice owns several expressions; repeat the edge from another Role when two
-voices endorse the same expression.
+has substantive responsibility. It does not target a Context. Repeat
+`forExpression` when one voice owns several expressions. Use another
+substantive Role edge only when that other voice itself asserts the expression,
+not merely because it reports or later endorses it.
+
+LegalRuleML Core has no direct equivalent of this repository's narration and
+endorsement edges. During projection, use `Role.forExpression` for
+`asserted_by`; preserve `reported_by`, `endorsed_by`, and their evidence in the
+voice ledger alongside the formal artifacts. Do not manufacture extra Roles to
+make narration or endorsement look like direct assertion. A later voice's own
+new proposition (“the board adopts the recommendation”) may independently be a
+keyed expression with its own Role, but that does not change ownership of the
+recommendation being adopted.
 
 `Authority` is different: it records the institutional authority applicable to
 statements through `Association.appliesAuthority`. It does not say who advanced
@@ -77,6 +105,31 @@ OASIS defines `appliesAlternatives` and `inScope`; using this combination as the
 named selection made by the decision is the repository profile. Absence from
 `inScope` means only "not selected here". When the text expressly rejects a
 claim, model that rejection or contrary finding as its own attributed statement.
+Context selection captures the formal adjudicative result; it does not replace
+the ledger's textual `endorsed_by` evidence, and endorsement alone does not
+justify a Context selection when the document does not make one.
+
+## Reading common vedtak formulations
+
+- **“Skattepliktige anfører at …”** — the embedded proposition is
+  `asserted_by` the taxpayer. The authorial voice of the passage is
+  `reported_by`; anchor the reporting clause as `explicit_reporting_clause`.
+- **The secretariat summarizes the tax office** — the tax office remains the
+  asserting voice and the secretariat is the reporting voice. A heading and a
+  clause such as “Skattekontoret la til grunn” may supply separate
+  `section_heading` and `explicit_reporting_clause` evidence spans.
+- **“Nemnda sluttet seg til sekretariatets innstilling”** — the recommendation
+  remains asserted by the secretariat and is expressly `endorsed_by` the board;
+  the board may also be the reporting voice for the recounted recommendation.
+  The board is not retroactively its direct asserter.
+- **Majority and minority opinions** — assign separate majority and minority
+  voices. Attribute each proposition to the relevant voice using the opinion
+  heading as evidence. Do not infer endorsement by the full board, and use
+  `Alternatives` only for genuinely incompatible legal renderings.
+- **Unattributed background narration** — use a stable document-narrator voice,
+  supported by `document_structure`, or an `inferred` basis with lower
+  confidence. Do not guess that the board or secretariat substantively asserted
+  it merely from the document's institutional provenance.
 
 ## Choose the conflict construct
 

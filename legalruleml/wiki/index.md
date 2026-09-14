@@ -36,9 +36,9 @@ Catalog of every page in the LegalRuleML wiki. Start here.
   competing interpretations; the four interpretation templates.
 - [concepts/metadata.md](concepts/metadata.md) — Agent, Figure, Role, Authority,
   Jurisdiction (provenance and applicability).
-- [concepts/voices-and-attribution.md](concepts/voices-and-attribution.md) — direct
-  Actor/Role/expression attribution, procedural voices, adjudicative selection,
-  and the repository voice profile.
+- [concepts/voices-and-attribution.md](concepts/voices-and-attribution.md) —
+  independent assertion, narration, and endorsement relations; direct
+  Actor/Role/expression projection; adjudicative selection; and evidence bases.
 - [concepts/temporal.md](concepts/temporal.md) — Time, TemporalCharacteristic,
   legal status (in force / efficacy / applicability), versioning over time.
 - [concepts/identifiers.md](concepts/identifiers.md) — `@key`/`@keyref`/`@iri`/`@sameAs`,
@@ -47,7 +47,8 @@ Catalog of every page in the LegalRuleML wiki. Start here.
 ## Mapping — vedtak → LegalRuleML
 
 - [mapping/voice-first-profile.md](mapping/voice-first-profile.md) — lightweight
-  keyed JSON extraction of material statements, exact quotes, procedural voices,
+  keyed JSON extraction of material statements, exact quotes, three independent
+  voice relations with evidence spans, procedural voices,
   and adoption status; separate from the `formal-rules` pipeline.
 - [mapping/vedtak-anatomy.md](mapping/vedtak-anatomy.md) — the structure of a
   Skatteklagenemnda vedtak and what each section contributes.
