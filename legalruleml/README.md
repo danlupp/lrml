@@ -32,9 +32,9 @@ formalization mandatory for every use case:
   adoption status, and extraction confidence. Optional fields record endorsement
   and explicit supersession. See the complete schema and review checks in
   [the voice-first statement profile](wiki/mapping/voice-first-profile.md).
-- **`formal-rules`** is the existing pipeline documented in the remainder of
-  this README. It produces LegalRuleML and the provenance, relation, and conflict
-  artifacts needed for formal modelling, validation, reasoning, and rendering.
+- **`formal-rules`** is the formal modelling profile documented in the remainder
+  of this README. This checkout contains its guidance and validator, but not the
+  inherited generator, reasoner, or persistence pipeline.
 
 The `voice-first` profile does not require full RuleML rules, relation manifests,
 hjemmel decomposition, temporal rule parameters, conflict reasoning, or SVG
@@ -44,49 +44,69 @@ RuleML predicates.
 
 ---
 
-## File map — what belongs to this capability
+## File map — this checkout
 
-| Path | Role |
+This map is intentionally limited to tracked paths that are present in this
+repository. References to the former host application are catalogued separately
+below and must not be read as claims that its code is available here.
+
+| Present path | Role |
 |---|---|
-| `legalruleml/wiki/` | The knowledge base the agent reads. `AGENTS.md` (stance + workflow), `index.md`, `concepts/*` (the LegalRuleML language), `mapping/*` (the `voice-first` profile plus the `formal-rules` vedtak→LRML playbook, anatomy, worked example, and pitfalls), `reference/*` (cheatsheet, vocabulary), `log.md` (append-only history). |
-| `legalruleml/xsd-schema/` | Vendored OASIS LegalRuleML 1.0 **compact** XSD (`compact/lrml-compact.xsd`, `compact/ruleml.xsd`, `datatypes/`, `xml.xsd`), patched for offline use. See its `README.md`. The single source of truth for validity. |
-| `legalruleml/bin/validate_lrml.py` | Validator: XSD + structural + PROV/relation-sidecar + hjemmel-anchoring checks (`--strict`, `--relations`, `--hjemmel`). The generation gate. |
-| `legalruleml/viz/lrml-to-dot.xsl` | XSLT that renders a `.lrml` to Graphviz DOT (→ SVG). |
-| `.github/skills/vedtak-to-legalruleml/` | The agent **skill** (prompt/playbook) that generates a file. |
-| `.github/skills/vedtak-to-legalruleml-doc-feedback/` | Variant skill: on a validator failure, decides whether the docs are wrong and proposes a fix for approval. |
-| `pi_runner/` | Node.js runner (`run_skill.mjs`) that drives the skill headlessly via the Pi Agent SDK. |
-| `src/vedtak_legalruleml/cli.py` | The `vedtak-legalruleml` umbrella CLI (`validate`, `lrml-html`, `vedtak-to-lrml`, `audit-law`). |
-| `src/vedtak_legalruleml/audit/` | Bundle-scoped ontology matching, reviewed/AI reconciliation, RDF projection, static SHACL validation, proposal caching, and audit reports. |
-| `src/vedtak_legalruleml/model_store.py` | Canonical SQLite rows for complete generated bundles plus read-only Rettsrev identity resolution. |
-| `src/vedtak_legalruleml/tools/vedtak_to_lrml.py` | Python entry that invokes `pi_runner`, gates temporary artifacts, and atomically stores a complete row. |
-| `src/vedtak_legalruleml/tools/lrml_html.py` | Interactive HTML graph view of a `.lrml` (+ its sidecar). |
-| `src/vedtak_legalruleml/tools/soksbie.py`, `soksbie_tui.py` | Search stored model rows by rettskilde-URN and fact text through a revision-tracked Postgres/pgvector index. |
-| `src/vedtak_legalruleml/assets/` | Bundled vis.js for the HTML view. |
-| `samples/in/`, `samples/out/` | Shared legal registers, legacy decision fixtures, and legacy generated bundles retained for migration. Canonical decision Markdown lives in Rettsrev SQLite. |
-| `build/legalruleml.sqlite` | Canonical runtime store: one complete LRML/PROV/relations/conflicts row per Rettsrev decision. |
-| `legalruleml/in/tutorial.pdf` | The LegalRuleML primer the wiki was distilled from (reference only). |
+| `legalruleml/wiki/` | Knowledge base: LegalRuleML concepts, formal mapping guidance, the voice-first application profile, annotation guidance, and the proposed bounded pipeline. |
+| `legalruleml/application-profiles/voices/v1.0.json` | Versioned controlled vocabulary for voice-first procedural roles. |
+| `legalruleml/evaluation/gold/v1.0/` | Versioned voice-first evaluation corpus, annotations, manifest, and release instructions. |
+| `legalruleml/xsd-schema/` | Vendored OASIS LegalRuleML 1.0 compact XSD and local imports, patched for offline use as described in its `README.md`. |
+| `legalruleml/bin/validate_lrml.py` | Implemented LRML/XSD, structure, sidecar, voice, relation, and hjemmel validator. |
+| `legalruleml/bin/validate_source_bundle.py` | Implemented validator for normalized source manifests, voice ledgers, quote offsets, and optional PROV sidecars. |
+| `legalruleml/bin/validate_voice_gold.py` | Implemented validator for the versioned voice-first gold release. |
+| `legalruleml/tests/` | Unit tests for the three validators. |
+| `legalruleml/viz/lrml-to-dot.xsl` | Implemented XSLT transform from LRML to Graphviz DOT. |
+| `legalruleml/in/` | Read-only LegalRuleML specification and tutorial reference material. |
 
-This capability was extracted from a larger host repo (`ratatouille`); a separate
-analysis pipeline there (`argumentgraf`, `lovgraf`, `instansier`, `rapport`,
-`shacl_*`, …, producing the other `samples/out/*.json` artifacts) was **not**
-brought along and is not part of this repo.
+### Architecture inherited from `ratatouille` (not included)
 
-The local `audit-law` pipeline is intentionally layered: LegalRuleML represents
-what the vedtak says; Tonto/RDF and static reviewed SHACL represent the external
-law. Azure OpenAI may align bundle-local symbols only to the finite candidates
-declared for the selected law version and supported by each atom's associated
-cited `LegalSource`; atom-level pinpoint citations narrow the surrounding rule's
-provision. Its outputs are proposals, not law:
-reviewed mappings win disagreements, deterministic reconciliation suppresses
-cross-bundle conflicts, and SHACL decides structural conformance. Use
-`--reviewed-only` for offline operation or `--ai-unknown-only` to avoid asking
-the model to recheck reviewed symbols.
+The original file map and agentic narrative described integration code from a
+larger host repository named **`ratatouille`**. None of the following paths or
+commands exists in this checkout. The upstream URL, tag, and commit were not
+recorded when this repository was extracted; consequently its version is
+**unresolved/unpinned**, rather than implicitly “latest.” Importing it requires
+first recording an immutable upstream URL and commit and then testing the
+interfaces below.
 
-The reader and audit projection preserve recursive `Atom`, `And`, `Or`, `Neg`,
-and `Naf` rule bodies. Formula operators and ordered operands remain explicit in
-the temporary RDF graph; only positive criteria logically required by every
-branch are exposed to prerequisite SHACL shapes. Other RuleML formula types are
-rejected explicitly rather than silently flattened.
+| External component (absent here) | Repository / version | Interface expected by this project documentation |
+|---|---|---|
+| Generator skills (`.github/skills/vedtak-to-legalruleml*`) | `ratatouille`; upstream URL and commit **not recorded** | A `SKILL.md` prompt consumes a decision and repository-relative wiki guidance and emits temporary `.lrml`, `.prov.xml`, `.relations.json`, and `.svg` artifacts. The doc-feedback variant proposes documentation edits and waits for approval. |
+| Headless runner (`pi_runner/run_skill.mjs`) and Pi Agent SDK | Wrapper: `ratatouille`, version **not recorded**; SDK package/version **not recorded** | Environment-variable configuration for provider credentials, model, skill directory, prompt, and working directory; stdout returns one JSON result and stderr carries progress. No Node package manifest or lockfile is included here. |
+| Python package and `vedtak-legalruleml` CLI (`src/vedtak_legalruleml/`) | `ratatouille`; upstream URL and commit **not recorded** | Subcommands formerly expected: `validate`, `lrml-html`, `vedtak-to-lrml`, and `audit-law`; generation invokes the headless runner and validators before persistence. |
+| Audit, Tonto/RDF/SHACL, conflict, search, and HTML-view components | `ratatouille`; upstream URL and commit **not recorded** | Inputs are LRML plus its sidecars and legal/ontology registers; outputs were audit proposals/reports, `conflicts.json`, searchable model rows, or self-contained HTML. No implementation, ontology, SHACL shapes, database schema, or search index is included here. |
+| Model store, Rettsrev adapter, registers, samples, and `build/legalruleml.sqlite` | `ratatouille` and an external Rettsrev deployment; versions and schemas **not recorded** | The former host expected decision text/identity from Rettsrev, JSON legal registers/configuration, and an atomic SQLite row containing a complete validated bundle. This checkout defines no compatible database or API contract beyond that historical description. |
+| `xmllint` / libxml2 | [GNOME libxml2](https://gitlab.gnome.org/GNOME/libxml2); version **not pinned** | `validate_lrml.py` invokes the `xmllint` executable with `--schema SCHEMA --noout FILE`; it must be on `PATH`. |
+| `xsltproc` / libxslt | [GNOME libxslt](https://gitlab.gnome.org/GNOME/libxslt); version **not pinned** | Optional XSLT 1.0 command-line processor for `lrml-to-dot.xsl`; reads LRML and writes DOT text. |
+| Graphviz `dot` | [Graphviz](https://gitlab.com/graphviz/graphviz); version **not pinned** | Optional renderer consuming DOT on stdin (or a file) and producing SVG with `-Tsvg`. |
+
+The OASIS schema is the one external implementation that **is vendored**: it is
+LegalRuleML Core Specification 1.0 (OASIS Standard, 30 August 2021), obtained
+from the OASIS LegalRuleML repository/distribution and consumed through
+`legalruleml/xsd-schema/compact/lrml-compact.xsd`. See the schema README for the
+two local import patches. The tutorial and saved specification under
+`legalruleml/in/` are documentation inputs, not runtime services.
+
+## Currently runnable components
+
+Only the following checked-in paths have runnable entry points:
+
+- `legalruleml/bin/validate_lrml.py` validates an existing `.lrml` file and its
+  optional/required sibling sidecars according to the selected flags.
+- `legalruleml/bin/validate_source_bundle.py` validates a supplied source
+  manifest and voice ledger, with an optional PROV file.
+- `legalruleml/bin/validate_voice_gold.py` validates
+  `legalruleml/evaluation/gold/v1.0/`.
+- `legalruleml/tests/` runs with Python's standard-library `unittest` runner.
+- `legalruleml/viz/lrml-to-dot.xsl` can be executed by an external XSLT 1.0
+  processor such as `xsltproc`; Graphviz may then convert its DOT output.
+
+There is **no checked-in extraction/generation orchestrator, agent skill, CLI,
+database, audit pipeline, conflict reasoner, search UI, or HTML graph viewer**.
 
 ---
 
@@ -273,155 +293,94 @@ canonical symbols in LRML directly and performs no heuristic alias merging.
 
 ## Part B — The agentic layer: how the agent is prompted
 
-The generator is an **AI agent driven by a skill**, not hand-written code. The
-skill is the prompt; the wiki is the reference the prompt points into.
+Part B is an **architecture specification**, not a description of an executable
+agent in this checkout. The checked-in wiki specifies prompts, data contracts,
+validation rules, and a bounded voice-first design. The former `ratatouille`
+host supplied the skills and orchestration described in the inherited-component
+table above; those implementations were not imported.
+
+### B.1 Proposed voice-first pipeline (future work)
+
+The voice-first profile, role vocabulary, gold data, and deterministic
+validators are implemented here. The pipeline that calls models and produces a
+voice ledger is not. In the diagram, **Implemented** nodes name checked-in code
+or data; **Future** nodes are design requirements from
+[the bounded pipeline](wiki/mapping/pipeline-design.md), not runnable commands.
 
 ```mermaid
 flowchart TD
-  A[/Decision, config, legal registers,<br/>and existing artifacts/] --> B([Read the skill, wiki playbook,<br/>concept pages, and syntax references])
-  B --> D([Build argument inventory,<br/>entity map, and canonical relation vocabulary])
-  D --> E{Existing LRML?}
-  E -- No --> F([Construct the LegalRuleML model])
-  E -- Yes --> G([Audit semantics, voices, quotes,<br/>and relation usage])
-  G --> H([Apply targeted repairs])
-  B -. guides repairs .-> H
-  F --> I([Write LRML and PROV quote sidecar])
-  H --> I
-  I --> J([Write the decision-local relation reference<br/>relations.json])
-  J --> K([Completeness and traceability audit])
-  K --> L[Strict schema, voice, provenance,<br/>hjemmel, and relation validation]
-  L -- Errors --> H
-  L -- OK --> M[Render the SVG]
-  M --> N[Run the conflict reasoner<br/>on canonical LRML symbols]
-  N --> O[Write conflicts.json and report results]
+  A[/Decision text/] --> B[Future: normalize and section]
+  B --> C([Future: bounded low-cost extraction])
+  C --> D[Implemented contract:<br/>voice profile and role vocabulary]
+  D --> E[Implemented gate:<br/>validate_source_bundle.py]
+  E -- invalid, one retry available --> F([Future: section-local repair])
+  F --> E
+  E -- uncertain or conflicting --> G([Future: one strong-model adjudication])
+  G --> E
+  E -- valid --> H[Future: deterministic merge<br/>and audit ledger]
+  H --> I{Requested output}
+  I -- voice ledger --> J[Future: persist reviewed ledger]
+  I -- LegalRuleML --> K[Future: compile, do not re-extract]
+  K --> L[Implemented gate:<br/>validate_lrml.py]
+  L --> M[Optional implemented transform:<br/>lrml-to-dot.xsl]
 
-  subgraph LEGEND[Legend]
-    direction LR
-    LLM([LLM])
-    TOOL[Deterministic]
-    INPUT[/Input/]
-    CHOICE{Branch}
-  end
-
-  classDef legend font-size:10px
-  class LLM,TOOL,INPUT,CHOICE legend
+  N[Implemented evaluation:<br/>gold/v1.0 + validate_voice_gold.py] -. tests extraction<br/>once implemented .-> C
 ```
 
-The dotted arrow shows a guidance dependency rather than execution flow.
+The retry and adjudication branches are deliberately finite. They express the
+future orchestrator's call budget; the present validators do not call a model,
+repair output, merge records, or persist results.
 
-The relation manifest is a decision-local review reference, not an alias table
-for the reasoner. Conflict analysis is the final, observational step: its
-findings are reported, but they do not trigger changes to otherwise valid
-generated artifacts.
+### B.2 Inherited formal-rules agent (not included)
 
-### B.1 The skills
+The former host used two skills under
+`.github/skills/vedtak-to-legalruleml*`: a routine generator and a
+documentation-feedback variant. Their expected contract is recorded in the
+inherited-component table, but neither `SKILL.md` is present. Therefore commands
+such as `vedtak-legalruleml vedtak-to-lrml`, claims about Azure/Entra
+authentication, Pi Agent SDK execution, conflict analysis, and atomic SQLite
+persistence are historical architecture only and cannot be exercised here.
 
-Both live in `.github/skills/` (a `SKILL.md` with YAML frontmatter — `name`,
-`description` for trigger routing, `argument-hint`).
+If these pieces are imported later, pin the `ratatouille` commit and Pi SDK
+package version, add their dependency lockfiles, and test the following boundary:
 
-- **`vedtak-to-legalruleml`** — the default generator. Its procedure (an 11-step
-  summary of [mapping/vedtak-to-legalruleml.md](wiki/mapping/vedtak-to-legalruleml.md)):
-  read inputs → scaffold the document → build the reference/provenance/temporal
-  metadata → write the rule, facts, definitions, disputes/overrides, and the
-  explicit per-year conclusion → write the PROV sidecar → tie everything with
-  Associations → **run the validator and fix until it passes** → render the SVG →
-  report. It emits a temporary LRML/PROV/relations/SVG bundle; the generator
-  adds conflict analysis and commits one complete SQLite row only after all gates pass.
+1. input: normalized decision text plus explicitly versioned config/registers;
+2. temporary output: `.lrml`, `.prov.xml`, and when requested
+   `.voices.json`/`.relations.json`;
+3. gate: invoke the checked-in validators as subprocesses and require exit 0;
+4. optional rendering: invoke the checked-in XSLT; and
+5. persistence: publish nothing until every requested artifact passes.
 
-- **`vedtak-to-legalruleml-doc-feedback`** — same deliverable, but treats a
-  **validator failure as a candidate documentation bug**. On failure it
-  diagnoses against the XSD (ground truth, not the wiki), classifies the cause as
-  a **fluke** (agent error — fix the file silently) or **systematic** (a doc
-  bug/gap that would mislead any careful reader), and for systematic issues
-  drafts a concrete wiki/skill edit, computes its blast radius across the linked
-  pages, **explains it and requires user approval before editing**, then applies
-  and logs it. Use it when onboarding a new vedtak shape or after a spec/schema
-  change; use the base skill for routine conversion. (The
-  [log.md](wiki/log.md) `2026-09-04` entry on the tilleggsskatt `Violation` gap
-  is a real example of this loop firing.)
+### B.3 The knowledge base (included)
 
-### B.2 The knowledge base
-
-The skill deliberately holds little detail and delegates to the wiki, so the two
-stay in sync. Reading order: [wiki/AGENTS.md](wiki/AGENTS.md) (stance, conventions,
-the modelling decisions) → [wiki/index.md](wiki/index.md) (page catalog) →
-`mapping/` for the procedure → `concepts/` for any single element → `reference/`
-for syntax. `wiki/log.md` is the append-only record of ingests and fixes.
-
-### B.3 The headless runner
-
-`vedtak-legalruleml vedtak-to-lrml <vedtak.md>` (→ `src/vedtak_legalruleml/tools/vedtak_to_lrml.py`)
-runs the skill non-interactively. It authenticates to Azure OpenAI (Entra ID /
-managed identity), then shells out to `pi_runner/run_skill.mjs`, which drives the
-**Pi Agent SDK** against the model with `.github/skills/vedtak-to-legalruleml` as
-the active skill and the repo as the tool workspace. Config is passed via env
-vars (token, base URL, model id, skill dir, prompt, cwd); the runner prints one
-JSON result line and streams the agent’s work to stderr. Its aggregate usage is
-appended to `samples/out/vedtak-to-lrml.log` without double-counting individual
-assistant messages. The same ledger also receives audit matching, conflict
-explanation, and embedding usage; `VEDTAK_LEGALRULEML_LLM_USAGE_LOG` overrides
-the shared path.
-
-### The input contract
-
-For a vedtak `samples/in/<name>.md`, the agent gathers companions:
-
-| File | Provides |
-|---|---|
-| `<name>.md` | The decision text: facts, anførsler, vurderinger, konklusjon, evt. dissens. |
-| `<name>.config.json` | `struktur.tonto` (the domain ontology / lovgraf files) and `instansiering_hint` (rettssubjekt = skattepliktige, pliktsubjekt = skattemyndigheten) that guides slot-filling. |
-| `rettsinformasjon.json` | Per provision: `hjemmel_id`, `aliaser`, and `versjoner`/`parametre` (e.g. terskelbeløp per year). |
-| `rettsreferanser.json` | Legal-reference register keyed by legacy `urn:rettskilde:no:…`; provides fallback identities, aliases, pinpoint patterns, and verified `rettsrevResourceId` / `rettsrevCanonicalRef` mappings. If a cited provision is new, the agent normalizes and adds the legacy entry before resolving it through Rettsrev. |
-
-The `:relation` IRIs in the rules are bindings to the domain ontology declared in
-the `*.tonto` files (referenced from `config.json`); the default `xmlns` points
-at that ontology namespace.
+The wiki is usable independently of the missing agent. Reading order:
+[wiki/AGENTS.md](wiki/AGENTS.md) (stance and conventions) →
+[wiki/index.md](wiki/index.md) (catalog) → `mapping/` (procedures and profile) →
+`concepts/` (element semantics) → `reference/` (syntax). `wiki/log.md` is the
+append-only documentation history. A future skill may consume these pages, but
+no skill is required to read or validate them.
 
 ---
 
 ## Consumers — what reads the generated files
 
-| Command / tool | What it does |
-|---|---|
-| `python3 legalruleml/bin/validate_lrml.py [--strict] [--relations] [--hjemmel] <f>.lrml` | Validate XSD, structure, sidecars, canonical relations, and hjemmel anchoring. `--relations` requires and reports the document-local vocabulary. |
-| `vedtak-legalruleml lrml-html <f>.lrml [--output …]` | Interactive vis.js graph of the model; keyed elements as nodes, `keyref`/`over`/`under` as edges; sidecar quotes as node tooltips. Self-contained HTML. |
-| `xsltproc legalruleml/viz/lrml-to-dot.xsl <f>.lrml \| dot -Tsvg -o <f>.svg` | Static Graphviz SVG of the same graph. |
-| `vedtak-legalruleml soksbie` is not wired; use `søksbie [model-db]` | Index complete rows from the LegalRuleML SQLite store and search legal applications by rettskilde-URN (hierarchical/prefix — a pinpoint query like `…:del:1:ledd:2` returns the individual vilkår anchored there) and by fact text (vector search over stored PROV quote text). `soksbie_tui.py` is the terminal UI. |
-
-`lrml_html.py` reads `.prov.xml` sidecars, while `soksbie.py` reads equivalent
-LRML and PROV text from complete SQLite rows. Both understand the schema-valid id shapes (keyless `LegalReference@refersTo`,
-colon-stripped RuleML keys); both retain legacy paths (embedded `prov:Bundle`,
-inline `lrml:Paraphrase`) for older inputs. Both also understand
-[hjemmel anchoring](wiki/concepts/hjemmel-anchoring.md): søksbie indexes a
-fragment-level link against its enclosing statement while keeping the fragment
-key (shown as `vilkår=…`), and the graph views draw keyed Associations as their
-own hubs with keyed vilkår atoms as nodes.
+| Availability | Command / tool | What it does |
+|---|---|---|
+| Included | `python3 legalruleml/bin/validate_lrml.py [--strict] [--voices] [--relations] [--hjemmel] <f>.lrml` | Validate an LRML file and selected sidecar contracts. |
+| Included | `python3 legalruleml/bin/validate_source_bundle.py MANIFEST VOICE_LEDGER [PROV]` | Validate normalization, hashes, exact quote offsets, and optional PROV links. |
+| Included | `python3 legalruleml/bin/validate_voice_gold.py legalruleml/evaluation/gold/v1.0` | Validate the checked-in voice-first benchmark release. |
+| Included, external executables required | `xsltproc legalruleml/viz/lrml-to-dot.xsl <f>.lrml \| dot -Tsvg -o <f>.svg` | Transform LRML to DOT and then SVG. |
+| Not included | `vedtak-legalruleml …`, `søksbie …`, audit/conflict tools, and HTML viewer | Historical `ratatouille` consumers; no matching path or executable is present. |
 
 ---
 
 ## Migration notes
 
-This repo *is* the migrated capability — see the root
-[README](../README.md) for the concrete layout, quickstart, and what runs out of
-the box. Points worth keeping in mind if you move or restructure it further:
-
-1. **Relative paths are load-bearing.** The validator resolves the schema as
-   `bin/../xsd-schema/compact/lrml-compact.xsd`; the skills reference `wiki/`
-   pages by relative path; `vedtak_to_lrml.py` finds `pi_runner/` and
-   `.github/skills/` from the repo root (three parents up). Keep the
-   `legalruleml/`, `.github/skills/`, and `pi_runner/` positions intact, or
-   update those references together.
-2. **Keep the wiki and skills co-located and versioned together** — the
-   doc-feedback skill *edits* the wiki, so they must ship as one unit.
-3. **Runtime dependencies:** `xmllint` (libxml2) and Graphviz (`dot`) on the
-   system; Python (stdlib `xml.etree` for validate/HTML; `psycopg`/`openai`/
-   `azure-identity`/`textual` for søksbie, with a local vector-search fallback);
-   Node.js + the Pi Agent SDK for `pi_runner/`.
-4. **LLM provider.** The Pi runner is provider-agnostic via `PI_AZURE_*` env
-   vars; `vedtak_to_lrml.py` currently obtains an Azure/Entra token — swap that
-   for your provider’s auth.
-
-The generation workspace contains `<name>.lrml`, `<name>.prov.xml`,
-`<name>.relations.json`, `<name>.conflicts.json`, and `<name>.svg`. Canonical
-runtime persistence is the complete SQLite row; temporary files remain the
-validation interface for the vendored schema and existing tools.
+This checkout is a documentation, schema, validator, and evaluation subset—not
+a complete migration of the former host capability. Preserve the relative
+`legalruleml/bin/` → `legalruleml/xsd-schema/` layout because the LRML validator
+resolves the vendored schema from it. Before restoring any inherited component,
+record its upstream URL and immutable version, specify its input/output schema,
+and add an integration test against the checked-in validators. Do not recreate
+the absent SQLite, Rettsrev, ontology, or provider boundary from the historical
+prose alone.
