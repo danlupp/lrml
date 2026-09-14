@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "1.0",
+  "profileId": "no.rettsrev.legalruleml.voices/1.0",
+  "unknownRoleSeverity": "warning",
+  "roles": [
+    {
+      "stableRoleIdentifier": "claimant",
+      "norwegianLabels": ["skattepliktig", "klager", "innsender"],
+      "textualCues": ["anfører", "hevder", "mener", "ber om"],
+      "searchableVoice": true,
+      "mayMakeOperativeFindings": false,
+      "directExpressionAttributionRequired": true,
+      "parentRole": null
+    },
+    {
+      "stableRoleIdentifier": "first-instance-decider",
+      "norwegianLabels": ["skattekontoret", "førsteinstansen"],
+      "textualCues": ["skattekontoret la til grunn", "vedtok", "fastsatte"],
+      "searchableVoice": true,
+      "mayMakeOperativeFindings": true,
+      "directExpressionAttributionRequired": true,
+      "parentRole": "decider"
+    },
+    {
+      "stableRoleIdentifier": "recommender",
+      "norwegianLabels": ["sekretariatet", "innstillende organ"],
+      "textualCues": ["sekretariatet mener", "innstiller", "foreslår"],
+      "searchableVoice": true,
+      "mayMakeOperativeFindings": false,
+      "directExpressionAttributionRequired": true,
+      "parentRole": null
+    },
+    {
+      "stableRoleIdentifier": "decider",
+      "norwegianLabels": ["nemnda", "flertallet", "avgjørelsesorganet"],
+      "textualCues": ["nemnda kom til", "flertallet finner", "vedtak"],
+      "searchableVoice": true,
+      "mayMakeOperativeFindings": true,
+      "directExpressionAttributionRequired": true,
+      "parentRole": null
+    },
+    {
+      "stableRoleIdentifier": "dissenter",
+      "norwegianLabels": ["mindretallet", "dissenterende medlem"],
+      "textualCues": ["mindretallet mener", "dissens", "uenig"],
+      "searchableVoice": true,
+      "mayMakeOperativeFindings": false,
+      "directExpressionAttributionRequired": true,
+      "parentRole": "decider"
+    },
+    {
+      "stableRoleIdentifier": "author",
+      "norwegianLabels": ["forfatter"],
+      "textualCues": [],
+      "searchableVoice": false,
+      "mayMakeOperativeFindings": false,
+      "directExpressionAttributionRequired": false,
+      "parentRole": null
+    },
+    {
+      "stableRoleIdentifier": "model-author",
+      "norwegianLabels": ["modellforfatter"],
+      "textualCues": [],
+      "searchableVoice": false,
+      "mayMakeOperativeFindings": false,
+      "directExpressionAttributionRequired": false,
+      "parentRole": "author"
+    }
+  ]
+}

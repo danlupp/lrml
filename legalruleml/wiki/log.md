@@ -257,3 +257,9 @@ log is greppable: `grep "^## \[" log.md | tail -10`.
   multiple taxpayers, procedural history, and majority/minority opinions.
 - Added an offline validator and regression tests for hashes, disjoint splits,
   controlled labels, and exact span round trips.
+## [2026-09-14] profile | Versioned voice-role semantics
+
+- Moved procedural role names and semantics from `validate_lrml.py` into the
+  versioned voice application profile. The validator now accepts extended
+  profiles for document-specific roles and reports unknown roles according to
+  profile policy instead of silently treating them as non-substantive.
