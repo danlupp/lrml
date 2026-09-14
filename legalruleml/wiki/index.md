@@ -46,6 +46,9 @@ Catalog of every page in the LegalRuleML wiki. Start here.
 
 ## Mapping — vedtak → LegalRuleML
 
+- [mapping/pipeline-design.md](mapping/pipeline-design.md) — bounded,
+  section-scoped extraction with reversible normalization, exact-quote gates,
+  selective adjudication, deterministic merging, and cost telemetry.
 - [mapping/voice-first-profile.md](mapping/voice-first-profile.md) — lightweight
   keyed JSON extraction of material statements, exact quotes, three independent
   voice relations with evidence spans, procedural voices,
