@@ -212,3 +212,14 @@ log is greppable: `grep "^## \[" log.md | tail -10`.
 - Workbench reads persisted models from SQLite. Søksbie materializes LRML and
   PROV rows into Postgres/pgvector and rebuilds when the model corpus revision
   changes; legacy filesystem bundles remain available for one-time import.
+
+## [2026-09-14] feature | Voice-first statement profile
+
+- Added a lightweight `voice-first` profile with one keyed JSON record per
+  material statement, controlled statement kinds, exact source offsets, direct
+  procedural attribution, adoption status, and natural-language searchable
+  assertions.
+- Kept the existing LegalRuleML generation workflow as the separate
+  `formal-rules` profile. RuleML rules, relation manifests, hjemmel decomposition,
+  temporal rule parameters, conflict reasoning, and SVG rendering are outside
+  the required scope of `voice-first`.
