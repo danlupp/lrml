@@ -46,6 +46,9 @@ Catalog of every page in the LegalRuleML wiki. Start here.
 
 ## Mapping — vedtak → LegalRuleML
 
+- [mapping/voice-first-profile.md](mapping/voice-first-profile.md) — lightweight
+  keyed JSON extraction of material statements, exact quotes, procedural voices,
+  and adoption status; separate from the `formal-rules` pipeline.
 - [mapping/vedtak-anatomy.md](mapping/vedtak-anatomy.md) — the structure of a
   Skatteklagenemnda vedtak and what each section contributes.
 - [mapping/vedtak-to-legalruleml.md](mapping/vedtak-to-legalruleml.md) — the core

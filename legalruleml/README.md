@@ -21,11 +21,34 @@ Read [Consumers](#consumers-what-reads-the-generated-files) and
 
 ---
 
+## Extraction profiles
+
+This repository offers two separate profiles rather than making full legal-rule
+formalization mandatory for every use case:
+
+- **`voice-first`** emits one keyed JSON record per material statement, keeping
+  the original speaker, procedural role, statement kind, a faithful searchable
+  natural-language proposition, an exact quote and offsets, attribution basis,
+  adoption status, and extraction confidence. Optional fields record endorsement
+  and explicit supersession. See the complete schema and review checks in
+  [the voice-first statement profile](wiki/mapping/voice-first-profile.md).
+- **`formal-rules`** is the existing pipeline documented in the remainder of
+  this README. It produces LegalRuleML and the provenance, relation, and conflict
+  artifacts needed for formal modelling, validation, reasoning, and rendering.
+
+The `voice-first` profile does not require full RuleML rules, relation manifests,
+hjemmel decomposition, temporal rule parameters, conflict reasoning, or SVG
+rendering. It can be used independently or as reviewed input to a later
+`formal-rules` run; its JSON assertions are natural-language propositions, not
+RuleML predicates.
+
+---
+
 ## File map — what belongs to this capability
 
 | Path | Role |
 |---|---|
-| `legalruleml/wiki/` | The knowledge base the agent reads. `AGENTS.md` (stance + workflow), `index.md`, `concepts/*` (the LegalRuleML language), `mapping/*` (the vedtak→LRML playbook, anatomy, worked example, pitfalls), `reference/*` (cheatsheet, vocabulary), `log.md` (append-only history). |
+| `legalruleml/wiki/` | The knowledge base the agent reads. `AGENTS.md` (stance + workflow), `index.md`, `concepts/*` (the LegalRuleML language), `mapping/*` (the `voice-first` profile plus the `formal-rules` vedtak→LRML playbook, anatomy, worked example, and pitfalls), `reference/*` (cheatsheet, vocabulary), `log.md` (append-only history). |
 | `legalruleml/xsd-schema/` | Vendored OASIS LegalRuleML 1.0 **compact** XSD (`compact/lrml-compact.xsd`, `compact/ruleml.xsd`, `datatypes/`, `xml.xsd`), patched for offline use. See its `README.md`. The single source of truth for validity. |
 | `legalruleml/bin/validate_lrml.py` | Validator: XSD + structural + PROV/relation-sidecar + hjemmel-anchoring checks (`--strict`, `--relations`, `--hjemmel`). The generation gate. |
 | `legalruleml/viz/lrml-to-dot.xsl` | XSLT that renders a `.lrml` to Graphviz DOT (→ SVG). |
