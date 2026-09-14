@@ -12,6 +12,10 @@ output, or as an optional precursor to the separate [`formal-rules`](#relationsh
 profile. Do not infer that a statement is a rule merely because it discusses
 law.
 
+For gold annotation, decision-level evaluation metrics, and the release gates
+that must pass before formal-rule evaluation, follow the
+[annotation and evaluation contract](voice-first-annotation-and-evaluation.md).
+
 ## Output shape
 
 The ledger is stored as `<name>.voices.json` and MUST use the source-manifest

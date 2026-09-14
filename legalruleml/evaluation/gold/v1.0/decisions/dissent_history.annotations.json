@@ -1,0 +1,108 @@
+{
+  "decision_id": "dissent_history",
+  "statements": [
+    {
+      "statement_id": "d1",
+      "spans": [
+        {
+          "start": 12,
+          "end": 53,
+          "text_exact": "Skattekontoret traff vedtak 3. mars 2024."
+        }
+      ],
+      "asserted_speaker": [
+        "tax-office"
+      ],
+      "procedural_role": "first_instance_decider",
+      "narrator": "decision-narrator",
+      "adoption_status": "reported",
+      "endorsed_by": [],
+      "statement_kind": "procedural_history"
+    },
+    {
+      "statement_id": "d2",
+      "spans": [
+        {
+          "start": 54,
+          "end": 96,
+          "text_exact": "Begge skattepliktige klaget 20. mars 2024."
+        }
+      ],
+      "asserted_speaker": [
+        "taxpayer-a",
+        "taxpayer-b"
+      ],
+      "procedural_role": "claimant",
+      "narrator": "decision-narrator",
+      "adoption_status": "reported",
+      "endorsed_by": [],
+      "statement_kind": "procedural_history"
+    },
+    {
+      "statement_id": "d3",
+      "spans": [
+        {
+          "start": 108,
+          "end": 184,
+          "text_exact": "Flertallet mener at vilkåret er oppfylt og gir begge skattepliktige fradrag."
+        }
+      ],
+      "asserted_speaker": [
+        "board-majority"
+      ],
+      "procedural_role": "decider",
+      "narrator": null,
+      "adoption_status": "adopted",
+      "endorsed_by": [],
+      "statement_kind": "operative_conclusion"
+    },
+    {
+      "statement_id": "d4",
+      "spans": [
+        {
+          "start": 198,
+          "end": 270,
+          "text_exact": "Mindretallet mener at vilkåret ikke er oppfylt og ville avslått klagene."
+        }
+      ],
+      "asserted_speaker": [
+        "board-minority"
+      ],
+      "procedural_role": "dissenter",
+      "narrator": null,
+      "adoption_status": "not_adopted",
+      "endorsed_by": [],
+      "statement_kind": "operative_conclusion"
+    }
+  ],
+  "excluded_spans": [
+    {
+      "exclusion_id": "x1",
+      "start": 0,
+      "end": 11,
+      "text_exact": "Sakens gang",
+      "reason": "heading"
+    },
+    {
+      "exclusion_id": "x2",
+      "start": 97,
+      "end": 107,
+      "text_exact": "Flertallet",
+      "reason": "heading"
+    },
+    {
+      "exclusion_id": "x3",
+      "start": 185,
+      "end": 197,
+      "text_exact": "Mindretallet",
+      "reason": "heading"
+    },
+    {
+      "exclusion_id": "x4",
+      "start": 271,
+      "end": 291,
+      "text_exact": "Medlemmer: X, Y og Z",
+      "reason": "administrative_metadata"
+    }
+  ]
+}

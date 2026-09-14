@@ -1,0 +1,96 @@
+{
+  "decision_id": "adoption_nested",
+  "statements": [
+    {
+      "statement_id": "a1",
+      "spans": [
+        {
+          "start": 41,
+          "end": 117,
+          "text_exact": "skattekontoret uttalte: «Lagmannsretten skrev: ‘fordelen er skattepliktig’.»"
+        }
+      ],
+      "asserted_speaker": [
+        "court"
+      ],
+      "procedural_role": "quoted_authority",
+      "narrator": "secretariat",
+      "adoption_status": "reported",
+      "endorsed_by": [],
+      "statement_kind": "legal_interpretation"
+    },
+    {
+      "statement_id": "a2",
+      "spans": [
+        {
+          "start": 118,
+          "end": 201,
+          "text_exact": "Skattepliktige A og skattepliktige B anfører i fellesskap at fordelen er skattefri."
+        }
+      ],
+      "asserted_speaker": [
+        "taxpayer-a",
+        "taxpayer-b"
+      ],
+      "procedural_role": "claimant",
+      "narrator": "decision-narrator",
+      "adoption_status": "rejected",
+      "endorsed_by": [],
+      "statement_kind": "legal_interpretation"
+    },
+    {
+      "statement_id": "a3",
+      "spans": [
+        {
+          "start": 202,
+          "end": 303,
+          "text_exact": "Nemnda slutter seg uttrykkelig til sekretariatets begrunnelse om at fradragsvilkåret ikke er oppfylt."
+        }
+      ],
+      "asserted_speaker": [
+        "secretariat"
+      ],
+      "procedural_role": "recommender",
+      "narrator": "board",
+      "adoption_status": "adopted",
+      "endorsed_by": [
+        "board"
+      ],
+      "statement_kind": "legal_interpretation"
+    },
+    {
+      "statement_id": "a4",
+      "spans": [
+        {
+          "start": 304,
+          "end": 331,
+          "text_exact": "Klagene tas ikke til følge."
+        }
+      ],
+      "asserted_speaker": [
+        "board"
+      ],
+      "procedural_role": "decider",
+      "narrator": null,
+      "adoption_status": "adopted",
+      "endorsed_by": [],
+      "statement_kind": "operative_conclusion"
+    }
+  ],
+  "excluded_spans": [
+    {
+      "exclusion_id": "x1",
+      "start": 0,
+      "end": 14,
+      "text_exact": "Nemndas vedtak",
+      "reason": "heading"
+    },
+    {
+      "exclusion_id": "x2",
+      "start": 332,
+      "end": 345,
+      "text_exact": "Saksnummer 42",
+      "reason": "administrative_metadata"
+    }
+  ]
+}
