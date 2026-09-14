@@ -1,8 +1,9 @@
 # Voice-first statement profile
 
 The **`voice-first`** profile is a lightweight extraction profile for answering
-three questions before attempting formalization: **who said what, in what
-procedural capacity, and did the decision adopt it?** It preserves searchable
+questions before attempting formalization: **who is substantively responsible,
+who narrates it, in what procedural capacity, and who later adopts it?** It
+preserves searchable
 natural-language propositions and exact source spans. It does not produce
 LegalRuleML.
 
@@ -23,7 +24,8 @@ be unique within the document output.
   "stmt-0042": {
     "statement_id": "stmt-0042",
     "document_id": "vedtak-2026-17",
-    "speaker_id": "sekretariatet",
+    "asserted_by": ["sekretariatet"],
+    "reported_by": [],
     "procedural_role": "recommender",
     "statement_kind": "legal_interpretation",
     "assertion_text": "The ferry route is not public transport for purposes of the deduction rule.",
@@ -31,10 +33,27 @@ be unique within the document output.
     "quote_start": 12844,
     "quote_end": 12916,
     "section_path": ["Sekretariatets vurderinger", "Rettslig vurdering"],
-    "attribution_basis": "explicit_section_voice",
+    "attribution_basis": [
+      {
+        "value": "section_heading",
+        "relation": "asserted_by",
+        "voice_id": "sekretariatet",
+        "evidence_text": "Sekretariatets vurderinger",
+        "evidence_start": 12602,
+        "evidence_end": 12629
+      },
+      {
+        "value": "document_structure",
+        "relation": "asserted_by",
+        "voice_id": "sekretariatet",
+        "evidence_text": "Fergesambandet anses ikke som offentlig transport etter fradragsregelen.",
+        "evidence_start": 12844,
+        "evidence_end": 12916
+      }
+    ],
     "adoption_status": "recommended",
     "confidence": 0.97,
-    "endorsed_by": ["skatteklagenemnda"]
+    "endorsed_by": []
   }
 }
 ```
@@ -53,23 +72,39 @@ statement in the same words.
 |---|---|---|
 | `statement_id` | required string | Stable, document-local identifier; identical to the enclosing JSON key. |
 | `document_id` | required string | Stable identity of the source decision or document. |
-| `speaker_id` | required string | Stable identity of the person, body, party, majority, minority, or quoted authority responsible for the statement. Do not substitute the document author when the text names another voice. |
-| `procedural_role` | required string | The speaker's capacity for this statement, for example `claimant`, `respondent`, `recommender`, `decider`, `dissenter`, `witness`, or `quoted_authority`. |
+| `asserted_by` | required non-empty array of strings | Voice(s) to which the proposition is substantively attributed. Use stable IDs for the person, body, party, majority, minority, or quoted authority. Joint assertions may have several voices. |
+| `reported_by` | required array of strings | Document voice(s) that narrate, quote, or paraphrase another voice's proposition. Use `[]` when the source presents the assertion directly. Reporting does not transfer substantive responsibility. |
+| `procedural_role` | required string | The asserting voice's capacity for this statement, for example `claimant`, `respondent`, `recommender`, `decider`, `dissenter`, `witness`, or `quoted_authority`. |
 | `statement_kind` | required enum | The semantic class defined below. |
 | `assertion_text` | required string | A faithful, stand-alone, searchable natural-language proposition. |
 | `quote_exact` | required string | Verbatim source text supporting the proposition. |
 | `quote_start` / `quote_end` | required non-negative integers | Inclusive start and exclusive end offsets for `quote_exact` in canonical document text. |
 | `section_path` | required array of strings | Ordered heading path from the document root to the quote; use `[]` only when the source has no headings. |
-| `attribution_basis` | required enum | Why `speaker_id` and `procedural_role` were assigned: `explicit_speaker`, `explicit_section_voice`, `quotation_or_citation`, `document_structure`, or `inferred`. Prefer the most direct basis. |
+| `attribution_basis` | required non-empty array of objects | Independent reasons for the voice relations. Each object has `value`, `relation`, `voice_id`, `evidence_text`, `evidence_start`, and `evidence_end`; `relation` names one of the three voice fields and `voice_id` MUST occur in that field. The half-open evidence offsets use the same canonical text as the quote. Allowed values are `direct_quote`, `explicit_reporting_clause`, `section_heading`, `document_structure`, and `inferred`. |
 | `adoption_status` | required enum | `adopted`, `rejected`, `recommended`, `not_adopted`, `contested`, `reported`, or `unclear`. This describes treatment by the deciding voice, not truth. |
 | `confidence` | required number | Extraction confidence from `0.0` to `1.0`, inclusive; it is not substantive confidence that the assertion is true. |
-| `endorsed_by` | optional array of strings | Speaker IDs that expressly adopt or endorse this statement without becoming its original speaker. |
+| `endorsed_by` | required array of strings | Later voice(s) that expressly adopt this proposition without becoming its original asserting or reporting voice. Use `[]` when there is no express adoption. |
 | `supersedes_statement_id` | optional string | ID of an earlier record in the same document whose proposition this statement expressly replaces or corrects. It is not a generic disagreement link. |
 
-Unknown values are represented explicitly: use `unclear` for adoption, use
-`inferred` plus a suitably reduced `confidence` for uncertain attribution, and
-create a stable placeholder `speaker_id` rather than omitting a required field.
-Do not use `endorsed_by` to erase the original voice.
+Unknown values are represented explicitly: use `unclear` for adoption, use an
+`inferred` basis plus a suitably reduced `confidence` for uncertain attribution,
+and create a stable placeholder voice ID rather than omitting `asserted_by`.
+The three voice relations are independent: a voice may occur in more than one
+when the text genuinely gives it more than one function, but reporting and
+endorsement never implicitly add that voice to `asserted_by`.
+
+Evidence spans need not equal `quote_exact`. For example, the proposition may
+occur beneath a heading, while the heading itself supplies one attribution
+basis. Every evidence span MUST independently round-trip against the canonical
+document text. Record all material bases rather than selecting only the
+strongest one; an explicit reporting clause and a section heading can therefore
+both support the same relation. `inferred` is a last resort and its evidence
+should capture the contextual text that made the inference possible.
+Use `direct_quote` when quotation marks or an equivalent block quotation
+directly identify a voice's words; use `explicit_reporting_clause` for clauses
+such as “anfører at”, “uttalte at”, and “sluttet seg til”; use
+`section_heading` when a heading names the voice; and use `document_structure`
+when authorship follows from the document's established section layout.
 
 ## Statement kinds
 
@@ -113,6 +148,68 @@ Nor should `assertion_text` silently promote an allegation to a finding. Voice,
 procedural role, kind, and adoption are separate dimensions and must all be
 recorded.
 
+## Attribution examples
+
+These abbreviated records omit unchanged required fields and illustrative
+offsets. Production records include exact, round-tripping quote and evidence
+spans.
+
+### Party submission: “Skattepliktige anfører at …”
+
+For `Skattepliktige anfører at reisen var yrkesreise`, attribute the proposition
+to the taxpayer and the reporting clause to the document voice:
+
+```json
+{
+  "asserted_by": ["skattepliktige"],
+  "reported_by": ["sekretariatet"],
+  "endorsed_by": [],
+  "attribution_basis": [
+    {"value": "explicit_reporting_clause", "relation": "asserted_by", "voice_id": "skattepliktige", "evidence_text": "Skattepliktige anfører at", "evidence_start": 410, "evidence_end": 438},
+    {"value": "document_structure", "relation": "reported_by", "voice_id": "sekretariatet", "evidence_text": "Sekretariatets fremstilling", "evidence_start": 350, "evidence_end": 376}
+  ]
+}
+```
+
+`reported_by` identifies whoever authored that passage (here, the secretariat),
+not automatically the deciding board or the document as an abstract object.
+
+### Secretariat summary of the tax office
+
+Under a secretariat-authored section that paraphrases the tax office, use
+`asserted_by: ["skattekontoret"]` and `reported_by: ["sekretariatet"]`.
+Preserve both an `explicit_reporting_clause` span such as “Skattekontoret la til
+grunn at” and a `section_heading` or `document_structure` span when both help
+establish the narrator. Do not attribute the office's conclusion substantively
+to the secretariat merely because the secretariat summarizes it.
+
+### Express endorsement
+
+For `Nemnda sluttet seg til sekretariatets innstilling`, the proposition in the
+innstilling remains `asserted_by: ["sekretariatet"]`, can be
+`reported_by: ["nemnda"]` when the board's text recounts it, and has
+`endorsed_by: ["nemnda"]`. Anchor “sluttet seg til” as an
+`explicit_reporting_clause` basis for the narration and express adoption. Do
+not rewrite the earlier proposition as though the board originally asserted it.
+
+### Majority and minority opinions
+
+Give the majority and minority stable, distinct voice IDs. A proposition under
+“Flertallet” may use `asserted_by: ["nemnd-flertall"]` with a `section_heading`
+basis; a contrary proposition under “Mindretallet” uses
+`asserted_by: ["nemnd-mindretall"]`. Neither voice reports or endorses the other
+unless the text expressly does so. Membership in the final document alone is
+not endorsement by the full board.
+
+### Unattributed background narration
+
+Background prose with no named source still needs an asserting voice. Use the
+stable document-narrator placeholder (for example `vedtak-narrator`) in
+`asserted_by`, leave `reported_by` and `endorsed_by` empty, and supply
+`document_structure` or, if responsibility truly cannot be established,
+`inferred` evidence with reduced confidence. Do not silently assign the
+background proposition to the board, secretariat, or taxpayer.
+
 ## Relationship to `formal-rules`
 
 The existing vedtak-to-LegalRuleML pipeline remains a separate profile named
@@ -140,12 +237,13 @@ the JSON records as formal rules.
    may support multiple independently material statement records.
 2. Every top-level key equals its `statement_id`, and all referenced
    `supersedes_statement_id` values resolve.
-3. Every exact quote round-trips against the canonical document text at the
-   declared half-open offsets.
+3. Every exact quote and every attribution evidence span round-trips against the
+   canonical document text at the declared half-open offsets.
 4. Assertions are faithful searchable propositions, not predicates, and retain
    material negation, quantities, dates, and qualifications.
-5. The original speaker is preserved even when another voice endorses, rejects,
-   or reports the statement.
+5. `asserted_by`, `reported_by`, and `endorsed_by` are evaluated independently;
+   narration or endorsement never erases or silently changes substantive
+   attribution.
 6. Recommendations and operative conclusions remain distinct.
 
 ## See also

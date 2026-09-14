@@ -223,3 +223,12 @@ log is greppable: `grep "^## \[" log.md | tail -10`.
   `formal-rules` profile. RuleML rules, relation manifests, hjemmel decomposition,
   temporal rule parameters, conflict reasoning, and SVG rendering are outside
   the required scope of `voice-first`.
+
+## [2026-09-14] docs | Separate assertion, narration, and endorsement
+
+- Extended the voice-first schema and attribution guidance with
+  independent `asserted_by`, `reported_by`, and `endorsed_by` relations;
+  repeatable attribution bases with exact evidence spans; common vedtak
+  examples; and a projection rule that reserves `Role.forExpression` for
+  substantive responsibility while retaining narration and endorsement in the
+  voice ledger.
