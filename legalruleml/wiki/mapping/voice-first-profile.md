@@ -14,6 +14,12 @@ law.
 
 ## Output shape
 
+The ledger is stored as `<name>.voices.json` and MUST use the source-manifest
+envelope and quote-span format defined in
+[source manifests and quote locators](source-manifest.md). The abbreviated
+statement map below illustrates statement fields; in a file it belongs under
+the envelope's `statements` property.
+
 Emit one JSON object whose properties are statement IDs and whose values are
 statement records. There is **one keyed record per material statement**. The
 top-level key and the record's `statement_id` MUST be identical, and both MUST
@@ -29,9 +35,13 @@ be unique within the document output.
     "procedural_role": "recommender",
     "statement_kind": "legal_interpretation",
     "assertion_text": "The ferry route is not public transport for purposes of the deduction rule.",
-    "quote_exact": "Fergesambandet anses ikke som offentlig transport etter fradragsregelen.",
-    "quote_start": 12844,
-    "quote_end": 12916,
+    "quote_spans": [{
+      "quote_id": "quote-stmt-0042-a",
+      "start": 12844,
+      "end": 12916,
+      "text": "Fergesambandet anses ikke som offentlig transport etter fradragsregelen.",
+      "normalizationPolicy": "unicode-nfc-lf-v1"
+    }],
     "section_path": ["Sekretariatets vurderinger", "Rettslig vurdering"],
     "attribution_basis": [
       {
@@ -58,13 +68,11 @@ be unique within the document output.
 }
 ```
 
-JSON strings use the source document's Unicode text. Offsets are zero-based
-Unicode code-point offsets into the canonical document text; `quote_start` is
-inclusive and `quote_end` is exclusive. Therefore
-`document_text[quote_start:quote_end]` MUST equal `quote_exact`. Select the
-smallest self-contained exact span that supports the assertion. Repeated or
-overlapping spans are allowed when the source makes more than one material
-statement in the same words.
+JSON strings use the manifest's immutable normalized Unicode text. Offsets are
+document-relative, zero-based Unicode code-point offsets. Select the smallest
+self-contained exact span that supports the assertion. Quote spans MUST NOT
+overlap; records may refer to the same `quote_id` only through a separate
+non-locator reference added by a consumer.
 
 ## Record fields
 
@@ -77,8 +85,7 @@ statement in the same words.
 | `procedural_role` | required string | The asserting voice's capacity for this statement, for example `claimant`, `respondent`, `recommender`, `decider`, `dissenter`, `witness`, or `quoted_authority`. |
 | `statement_kind` | required enum | The semantic class defined below. |
 | `assertion_text` | required string | A faithful, stand-alone, searchable natural-language proposition. |
-| `quote_exact` | required string | Verbatim source text supporting the proposition. |
-| `quote_start` / `quote_end` | required non-negative integers | Inclusive start and exclusive end offsets for `quote_exact` in canonical document text. |
+| `quote_spans` | required non-empty array | Contiguous verbatim source spans. Each records unique `quote_id`, `start`, `end`, `text`, and `normalizationPolicy`; see [the locator specification](source-manifest.md). |
 | `section_path` | required array of strings | Ordered heading path from the document root to the quote; use `[]` only when the source has no headings. |
 | `attribution_basis` | required non-empty array of objects | Independent reasons for the voice relations. Each object has `value`, `relation`, `voice_id`, `evidence_text`, `evidence_start`, and `evidence_end`; `relation` names one of the three voice fields and `voice_id` MUST occur in that field. The half-open evidence offsets use the same canonical text as the quote. Allowed values are `direct_quote`, `explicit_reporting_clause`, `section_heading`, `document_structure`, and `inferred`. |
 | `adoption_status` | required enum | `adopted`, `rejected`, `recommended`, `not_adopted`, `contested`, `reported`, or `unclear`. This describes treatment by the deciding voice, not truth. |
@@ -93,7 +100,7 @@ The three voice relations are independent: a voice may occur in more than one
 when the text genuinely gives it more than one function, but reporting and
 endorsement never implicitly add that voice to `asserted_by`.
 
-Evidence spans need not equal `quote_exact`. For example, the proposition may
+Evidence spans need not equal a quote span. For example, the proposition may
 occur beneath a heading, while the heading itself supplies one attribution
 basis. Every evidence span MUST independently round-trip against the canonical
 document text. Record all material bases rather than selecting only the
@@ -238,7 +245,8 @@ the JSON records as formal rules.
 2. Every top-level key equals its `statement_id`, and all referenced
    `supersedes_statement_id` values resolve.
 3. Every exact quote and every attribution evidence span round-trips against the
-   canonical document text at the declared half-open offsets.
+   manifest's canonical document text at the declared half-open offsets; quote
+   spans are non-overlapping and PROV values match their spans byte-for-byte.
 4. Assertions are faithful searchable propositions, not predicates, and retain
    material negation, quantities, dates, and qualifications.
 5. `asserted_by`, `reported_by`, and `endorsed_by` are evaluated independently;
