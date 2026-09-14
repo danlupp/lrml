@@ -1,0 +1,73 @@
+{
+  "dataset": "vedtak-voice-gold",
+  "version": "1.0.0",
+  "schema_version": "1.0",
+  "annotation_guide": "../../../wiki/mapping/voice-first-annotation-and-evaluation.md",
+  "normalization_policy": "unicode-nfc-lf-v1",
+  "provenance": "Synthetic Norwegian fixtures; CC0-1.0",
+  "splits": {
+    "train": [
+      "ordinary"
+    ],
+    "development": [
+      "recommendation"
+    ],
+    "test": [
+      "adoption_nested",
+      "dissent_history"
+    ]
+  },
+  "decisions": [
+    {
+      "decision_id": "ordinary",
+      "source": "decisions/ordinary.txt",
+      "annotations": "decisions/ordinary.annotations.json",
+      "sha256": "9534168a2c713627a474bee426054c7c6c59a4fbbed0f478d4c97b65247c6f86",
+      "features": [
+        "ordinary_decision"
+      ]
+    },
+    {
+      "decision_id": "recommendation",
+      "source": "decisions/recommendation.txt",
+      "annotations": "decisions/recommendation.annotations.json",
+      "sha256": "2f3168f0a8bad9aa25bd934dae0a80160aa38b06480e4ee10c21401548ec04eb",
+      "features": [
+        "recommendation_only"
+      ]
+    },
+    {
+      "decision_id": "adoption_nested",
+      "source": "decisions/adoption_nested.txt",
+      "annotations": "decisions/adoption_nested.annotations.json",
+      "sha256": "54442716a6ea6c67ff5bb9b41c28b5a49074e3cb811a20bc2f791f074518e3b9",
+      "features": [
+        "explicit_adoption",
+        "indirect_speech",
+        "nested_quotation",
+        "multiple_taxpayers"
+      ]
+    },
+    {
+      "decision_id": "dissent_history",
+      "source": "decisions/dissent_history.txt",
+      "annotations": "decisions/dissent_history.annotations.json",
+      "sha256": "fa3f0bd469cd3ab366bb1cf8e98fca77541aecb98776b1beddca8c84e7d9c5c8",
+      "features": [
+        "multiple_taxpayers",
+        "procedural_history",
+        "majority_minority"
+      ]
+    }
+  ],
+  "feature_coverage": [
+    "ordinary_decision",
+    "recommendation_only",
+    "explicit_adoption",
+    "indirect_speech",
+    "nested_quotation",
+    "multiple_taxpayers",
+    "procedural_history",
+    "majority_minority"
+  ]
+}

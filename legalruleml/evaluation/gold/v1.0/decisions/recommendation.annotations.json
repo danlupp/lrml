@@ -1,0 +1,57 @@
+{
+  "decision_id": "recommendation",
+  "statements": [
+    {
+      "statement_id": "r1",
+      "spans": [
+        {
+          "start": 27,
+          "end": 83,
+          "text_exact": "Sekretariatet mener at fradragsvilkåret ikke er oppfylt."
+        }
+      ],
+      "asserted_speaker": [
+        "secretariat"
+      ],
+      "procedural_role": "recommender",
+      "narrator": null,
+      "adoption_status": "recommended",
+      "endorsed_by": [],
+      "statement_kind": "legal_interpretation"
+    },
+    {
+      "statement_id": "r2",
+      "spans": [
+        {
+          "start": 84,
+          "end": 136,
+          "text_exact": "Sekretariatet foreslår at klagen ikke tas til følge."
+        }
+      ],
+      "asserted_speaker": [
+        "secretariat"
+      ],
+      "procedural_role": "recommender",
+      "narrator": null,
+      "adoption_status": "recommended",
+      "endorsed_by": [],
+      "statement_kind": "recommendation"
+    }
+  ],
+  "excluded_spans": [
+    {
+      "exclusion_id": "x1",
+      "start": 0,
+      "end": 26,
+      "text_exact": "Sekretariatets innstilling",
+      "reason": "heading"
+    },
+    {
+      "exclusion_id": "x2",
+      "start": 205,
+      "end": 216,
+      "text_exact": "Side 1 av 1",
+      "reason": "page_header_footer"
+    }
+  ]
+}

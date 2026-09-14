@@ -1,0 +1,93 @@
+{
+  "decision_id": "ordinary",
+  "statements": [
+    {
+      "statement_id": "o1",
+      "spans": [
+        {
+          "start": 16,
+          "end": 67,
+          "text_exact": "Skattepliktige anfører at reisen var en yrkesreise."
+        }
+      ],
+      "asserted_speaker": [
+        "taxpayer"
+      ],
+      "procedural_role": "claimant",
+      "narrator": "decision-narrator",
+      "adoption_status": "contested",
+      "endorsed_by": [],
+      "statement_kind": "factual_allegation"
+    },
+    {
+      "statement_id": "o2",
+      "spans": [
+        {
+          "start": 68,
+          "end": 109,
+          "text_exact": "Skattekontoret fant at reisen var privat."
+        }
+      ],
+      "asserted_speaker": [
+        "tax-office"
+      ],
+      "procedural_role": "first_instance_decider",
+      "narrator": "decision-narrator",
+      "adoption_status": "reported",
+      "endorsed_by": [],
+      "statement_kind": "factual_finding"
+    },
+    {
+      "statement_id": "o3",
+      "spans": [
+        {
+          "start": 110,
+          "end": 155,
+          "text_exact": "Nemnda legger til grunn at reisen var privat."
+        }
+      ],
+      "asserted_speaker": [
+        "board"
+      ],
+      "procedural_role": "decider",
+      "narrator": null,
+      "adoption_status": "adopted",
+      "endorsed_by": [],
+      "statement_kind": "factual_finding"
+    },
+    {
+      "statement_id": "o4",
+      "spans": [
+        {
+          "start": 156,
+          "end": 190,
+          "text_exact": "Vedtak: Klagen tas ikke til følge."
+        }
+      ],
+      "asserted_speaker": [
+        "board"
+      ],
+      "procedural_role": "decider",
+      "narrator": null,
+      "adoption_status": "adopted",
+      "endorsed_by": [],
+      "statement_kind": "operative_conclusion"
+    }
+  ],
+  "excluded_spans": [
+    {
+      "exclusion_id": "x1",
+      "start": 0,
+      "end": 15,
+      "text_exact": "Ordinært vedtak",
+      "reason": "heading"
+    },
+    {
+      "exclusion_id": "x2",
+      "start": 191,
+      "end": 205,
+      "text_exact": "Signatur: A.B.",
+      "reason": "signature"
+    }
+  ]
+}

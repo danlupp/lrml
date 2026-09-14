@@ -248,3 +248,12 @@ log is greppable: `grep "^## \[" log.md | tail -10`.
 - Capped each section at two low-cost calls and one strong-model adjudication;
   prohibited model tool loops and required per-call model, prompt, token,
   failure, escalation, and cost telemetry.
+## [2026-09-14] docs | Voice-first gold annotation and evaluation contract
+
+- Added the normative decision-level annotation guide, metric definitions,
+  cost/escalation reporting, and release gates that precede formalization.
+- Published synthetic gold release `v1.0.0`, covering ordinary and
+  recommendation-only decisions, adoption, indirect and nested speech,
+  multiple taxpayers, procedural history, and majority/minority opinions.
+- Added an offline validator and regression tests for hashes, disjoint splits,
+  controlled labels, and exact span round trips.
