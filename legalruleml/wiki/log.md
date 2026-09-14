@@ -239,3 +239,12 @@ log is greppable: `grep "^## \[" log.md | tail -10`.
 - Replaced composite voice-ledger quotes with non-overlapping contiguous spans
   using canonical document-relative character offsets, and added source/PROV
   byte-equality validation.
+
+## [2026-09-14] docs | Bounded section extraction pipeline
+
+- Defined a finite, section-scoped extraction and adjudication pipeline with a
+  reversible normalization offset map, strict structured records, exact-quote
+  rejection, deterministic validation and merging, and fail-closed output.
+- Capped each section at two low-cost calls and one strong-model adjudication;
+  prohibited model tool loops and required per-call model, prompt, token,
+  failure, escalation, and cost telemetry.
